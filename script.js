@@ -169,9 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return svg;
   }
   
-  
-  
-
   function renderTable() {
     allocationTable.innerHTML = "";
 
