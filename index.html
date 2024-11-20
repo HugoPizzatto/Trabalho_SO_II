@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Alocação de Blocos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Simulador de Alocação de Blocos Lógicos</h1>
+  </header>
+  <main>
+    <!-- Configuração inicial -->
+    <section id="config-section">
+      <h2>Configuração</h2>
+      <form id="config-form">
+        <label for="disk-size">Tamanho do Disco (nº de blocos):</label>
+        <input type="number" id="disk-size" min="10" max="100" required>
+
+        <label for="allocation-type">Tipo de Alocação:</label>
+        <select id="allocation-type">
+          <option value="contiguous">Contígua</option>
+          <option value="linked">Encadeada</option>
+          <option value="indexed">Indexada</option>
+        </select>
+
+        <button type="submit">Iniciar Simulador</button>
+      </form>
+    </section>
+
+    <!-- Visualização do Disco -->
+    <section id="disk-visualization">
+      <h2>Visualização do Disco</h2>
+      <div id="disk-container"></div>
+    </section>
+
+    <!-- Controles do Usuário -->
+    <section id="file-controls">
+      <h2>Gerenciar Arquivos</h2>
+      <form id="file-form">
+        <label for="file-name">Nome do Arquivo:</label>
+        <input type="text" id="file-name" required>
+
+        <label for="file-size">Tamanho (em blocos):</label>
+        <input type="number" id="file-size" min="1" required>
+
+        <button type="button" id="add-file-btn">Adicionar Arquivo</button>
+        <button type="button" id="remove-file-btn">Remover Arquivo</button>
+      </form>
+    </section>
+
+    <!-- Tabela de Alocação -->
+    <section id="allocation-table-section">
+      <h2>Tabela de Alocação</h2>
+      <table id="allocation-table">
+        <thead>
+          <tr>
+            <th>Arquivo</th>
+            <th>Blocos Alocados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- As linhas serão geradas dinamicamente -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background: #f4f4f9;
+  color: #333;
+}
+
+header {
+  background: #333;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+}
+
+main {
+  padding: 20px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+h2 {
+  margin-top: 0;
+  color: #444;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+form input, form select, form button {
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+form button {
+  background: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background: #0056b3;
+}
+
+#disk-container {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  gap: 5px;
+}
+
+.block {
+  width: 30px;
+  height: 30px;
+  background: #e0e0e0;
+  border: 1px solid #ccc;
+  text-align: center;
+  line-height: 30px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.block.allocated {
+  background: #007BFF;
+  color: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.block.index {
+  border: 2px dashed #007BFF;
+}
+.block.linked {
+  background: #FF5733;
+}
