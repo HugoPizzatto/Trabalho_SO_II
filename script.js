@@ -52,11 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
     disk.forEach((block, index) => {
       const blockDiv = document.createElement("div");
       blockDiv.className = "block";
-      blockDiv.dataset.index = index; // Salva o índice como atributo
+      blockDiv.dataset.index = index;
   
       if (block) {
         blockDiv.classList.add("allocated");
-        blockDiv.textContent = typeof block === "object" ? block.fileName : block;
+        if (typeof block === "object") {
+          blockDiv.textContent = block.fileName;
+          blockDiv.style.backgroundColor = files[block.fileName].color; // Aplicar cor ao bloco encadeado
+        } else {
+          blockDiv.textContent = block;
+          blockDiv.style.backgroundColor = files[block].color; // Aplicar cor ao bloco contínuo ou indexado
+        }
       } else {
         blockDiv.textContent = index;
       }
@@ -69,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
+  
   function drawArrows(container) {
     container.innerHTML = ''; // Limpa as setas existentes
     const blocks = document.querySelectorAll('.block');
@@ -76,13 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (block && typeof block === 'object' && block.next !== null) {
         const startBlock = blocks[index];
         const endBlock = blocks[block.next];
-        const arrow = createArrow(startBlock, endBlock);
+        const arrow = createArrow(startBlock, endBlock, files[block.fileName].color); // Passar a cor do arquivo
         container.appendChild(arrow);
       }
     });
   }
   
-  function createArrow(startBlock, endBlock) {
+  
+  function createArrow(startBlock, endBlock, color) {
     const containerRect = startBlock.parentNode.getBoundingClientRect();
     const startRect = startBlock.getBoundingClientRect();
     const endRect = endBlock.getBoundingClientRect();
@@ -97,8 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const endY = endRect.top + endRect.height / 2 - containerRect.top;
   
     // Definindo os pontos de desvio para contornar os blocos
-    const offsetX = Math.sign(endX - startX) * 20; // Deslocamento horizontal, com sinal para definir a direção
-    const offsetY = Math.sign(endY - startY) * 20; // Deslocamento vertical, com sinal para definir a direção
+    const offsetX = Math.sign(endX - startX) * 20; // Deslocamento horizontal
+    const offsetY = Math.sign(endY - startY) * 20; // Deslocamento vertical
   
     const pathData = `
       M ${startX},${startY}
@@ -108,13 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
       L ${endX},${endY}
     `;
     path.setAttribute("d", pathData);
-    path.setAttribute("stroke", "#007BFF");
+    path.setAttribute("stroke", color); // Define a cor do arquivo
     path.setAttribute("stroke-width", "2");
     path.setAttribute("fill", "none");
-    path.setAttribute("marker-end", "url(#arrowhead)");
+    path.setAttribute("marker-end", `url(#arrowhead-${color.replace("#", "")})`); // Usa marcador com a cor
   
+    // Criar marcador para a ponta da seta
     const marker = document.createElementNS(svgNamespace, "marker");
-    marker.setAttribute("id", "arrowhead");
+    marker.setAttribute("id", `arrowhead-${color.replace("#", "")}`);
     marker.setAttribute("markerWidth", "10");
     marker.setAttribute("markerHeight", "7");
     marker.setAttribute("refX", "10");
@@ -123,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     const arrow = document.createElementNS(svgNamespace, "path");
     arrow.setAttribute("d", "M 0 0 L 10 3.5 L 0 7 Z");
-    arrow.setAttribute("fill", "#007BFF");
+    arrow.setAttribute("fill", color); // Define a cor da ponta da seta
     marker.appendChild(arrow);
   
     const defs = document.createElementNS(svgNamespace, "defs");
@@ -140,6 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
     return svg;
   }
+  
+  
+  
   
   
   
@@ -168,11 +180,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function addFile(fileName, fileSize) {
     if (files[fileName]) return alert("Arquivo já existe!");
     const freeBlocks = disk.map((block, index) => (block === null ? index : null)).filter((i) => i !== null);
-
+  
     if (fileSize > freeBlocks.length) return alert("Espaço insuficiente!");
-
+  
     let allocatedBlocks;
-
+  
     switch (allocationType) {
       case "contiguous":
         allocatedBlocks = allocateContiguously(freeBlocks, fileSize);
@@ -187,17 +199,23 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Tipo de alocação inválido!");
         return;
     }
-
+  
     if (!allocatedBlocks) return alert("Não foi possível alocar o arquivo!");
-
+  
+    const fileColor = generateRandomColor(); // Gerar uma cor para o arquivo
+  
     allocatedBlocks.forEach((block) => {
-      if (allocationType !== "linked") disk[block] = fileName; // Para encadeado, já está configurado na função
+      if (allocationType !== "linked") {
+        disk[block] = fileName; // Para encadeado, já está configurado na função
+      }
     });
-    files[fileName] = { blocks: allocatedBlocks };
-
+  
+    files[fileName] = { blocks: allocatedBlocks, color: fileColor }; // Salvar a cor no arquivo
+  
     renderDisk();
     renderTable();
   }
+  
 
   function removeFile(fileName) {
     if (!files[fileName]) return alert("Arquivo não encontrado!");
@@ -253,5 +271,14 @@ document.addEventListener("DOMContentLoaded", () => {
       [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+  }
+
+  function generateRandomColor() {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   }
 });
