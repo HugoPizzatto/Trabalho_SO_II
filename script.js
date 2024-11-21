@@ -70,9 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function drawArrows(container) {
-    const blocks = document.querySelectorAll(".block");
+    container.innerHTML = ''; // Limpa as setas existentes
+    const blocks = document.querySelectorAll('.block');
     disk.forEach((block, index) => {
-      if (block && typeof block === "object" && block.next !== null) {
+      if (block && typeof block === 'object' && block.next !== null) {
         const startBlock = blocks[index];
         const endBlock = blocks[block.next];
         const arrow = createArrow(startBlock, endBlock);
@@ -82,57 +83,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function createArrow(startBlock, endBlock) {
-    // Obter retângulo do container pai
     const containerRect = startBlock.parentNode.getBoundingClientRect();
     const startRect = startBlock.getBoundingClientRect();
     const endRect = endBlock.getBoundingClientRect();
   
-    // Dimensões dos blocos
-    const blockWidth = startRect.width;
-    const blockHeight = startRect.height;
-  
-    // Coordenadas iniciais e finais do centro do bloco
-    const startX = startRect.x - containerRect.x + blockWidth / 2;
-    const startY = startRect.y - containerRect.y + blockHeight / 2;
-    const endX = endRect.x - containerRect.x + blockWidth / 2;
-    const endY = endRect.y - containerRect.y + blockHeight / 2;
-  
-    // Coordenadas ajustadas para a borda do bloco (fora dos limites)
-    const startEdgeX = startX + (endX > startX ? blockWidth / 2 : -blockWidth / 2);
-    const startEdgeY = startY + (endY > startY ? blockHeight / 2 : -blockHeight / 2);
-    const endEdgeX = endX + (endX > startX ? -blockWidth / 2 : blockWidth / 2);
-    const endEdgeY = endY + (endY > startY ? -blockHeight / 2 : blockHeight / 2);
-  
-    // Coordenadas intermediárias para criar caminhos únicos
-    let middleX, middleY;
-  
-    if (startX === endX) {
-      // Caso: Vertical
-      middleX = startEdgeX;
-      middleY = (startEdgeY + endEdgeY) / 2;
-    } else if (startY === endY) {
-      // Caso: Horizontal
-      middleX = (startEdgeX + endEdgeX) / 2;
-      middleY = startEdgeY;
-    } else {
-      // Caso: Diagonal (Organograma)
-      middleX = startEdgeX;
-      middleY = endEdgeY;
-    }
-  
-    // Criar elemento SVG para o traçado
     const svgNamespace = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNamespace, "svg");
     const path = document.createElementNS(svgNamespace, "path");
-    const marker = document.createElementNS(svgNamespace, "marker");
   
-    // Definir o caminho
+    const startX = startRect.left + startRect.width / 2 - containerRect.left;
+    const startY = startRect.top + startRect.height / 2 - containerRect.top;
+    const endX = endRect.left + endRect.width / 2 - containerRect.left;
+    const endY = endRect.top + endRect.height / 2 - containerRect.top;
+  
+    // Definindo os pontos de desvio para contornar os blocos
+    const offsetX = Math.sign(endX - startX) * 20; // Deslocamento horizontal, com sinal para definir a direção
+    const offsetY = Math.sign(endY - startY) * 20; // Deslocamento vertical, com sinal para definir a direção
+  
     const pathData = `
-      M ${startEdgeX},${startEdgeY} 
-      L ${middleX},${startEdgeY}
-      L ${middleX},${middleY}
-      L ${endEdgeX},${middleY}
-      L ${endEdgeX},${endEdgeY}
+      M ${startX},${startY}
+      L ${startX + offsetX},${startY}
+      L ${startX + offsetX},${endY - offsetY}
+      L ${endX},${endY - offsetY}
+      L ${endX},${endY}
     `;
     path.setAttribute("d", pathData);
     path.setAttribute("stroke", "#007BFF");
@@ -140,34 +113,35 @@ document.addEventListener("DOMContentLoaded", () => {
     path.setAttribute("fill", "none");
     path.setAttribute("marker-end", "url(#arrowhead)");
   
-    // Configurar o marcador (flecha na ponta)
+    const marker = document.createElementNS(svgNamespace, "marker");
     marker.setAttribute("id", "arrowhead");
     marker.setAttribute("markerWidth", "10");
     marker.setAttribute("markerHeight", "7");
     marker.setAttribute("refX", "10");
     marker.setAttribute("refY", "3.5");
     marker.setAttribute("orient", "auto");
+  
     const arrow = document.createElementNS(svgNamespace, "path");
     arrow.setAttribute("d", "M 0 0 L 10 3.5 L 0 7 Z");
     arrow.setAttribute("fill", "#007BFF");
     marker.appendChild(arrow);
   
-    // Adicionar marcador ao SVG
     const defs = document.createElementNS(svgNamespace, "defs");
     defs.appendChild(marker);
     svg.appendChild(defs);
+    svg.appendChild(path);
   
-    // Configurar SVG
     svg.style.position = "absolute";
     svg.style.left = "0";
     svg.style.top = "0";
     svg.style.width = "100%";
     svg.style.height = "100%";
-    svg.style.pointerEvents = "none"; // Impede interação com o SVG
-    svg.appendChild(path);
+    svg.style.pointerEvents = "none";
   
     return svg;
   }
+  
+  
   
   function renderTable() {
     allocationTable.innerHTML = "";
