@@ -45,9 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderDisk() {
     diskContainer.innerHTML = "";
-    const arrowContainer = document.createElement("div");
-    arrowContainer.className = "arrow-container";
-    diskContainer.appendChild(arrowContainer);
   
     disk.forEach((block, index) => {
       const blockDiv = document.createElement("div");
@@ -58,10 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
         blockDiv.classList.add("allocated");
         if (typeof block === "object") {
           blockDiv.textContent = block.fileName;
-          blockDiv.style.backgroundColor = files[block.fileName].color; // Aplicar cor ao bloco encadeado
+          blockDiv.style.backgroundColor = files[block.fileName].color;
         } else {
           blockDiv.textContent = block;
-          blockDiv.style.backgroundColor = files[block].color; // Aplicar cor ao bloco contínuo ou indexado
+          blockDiv.style.backgroundColor = files[block].color;
         }
       } else {
         blockDiv.textContent = index;
@@ -69,111 +66,27 @@ document.addEventListener("DOMContentLoaded", () => {
   
       diskContainer.appendChild(blockDiv);
     });
-  
-    if (allocationType === "linked") {
-      drawArrows(arrowContainer);
-    }
   }
-  
-  
-  function drawArrows(container) {
-    container.innerHTML = ''; // Limpa as setas existentes
-    const blocks = document.querySelectorAll('.block');
-    disk.forEach((block, index) => {
-      if (block && typeof block === 'object' && block.next !== null) {
-        const startBlock = blocks[index];
-        const endBlock = blocks[block.next];
-        const arrow = createArrow(startBlock, endBlock, files[block.fileName].color); // Passar a cor do arquivo
-        container.appendChild(arrow);
-      }
-    });
-  }
-  
-  
-  function createArrow(startBlock, endBlock, color) {
-    const containerRect = startBlock.parentNode.getBoundingClientRect();
-    const startRect = startBlock.getBoundingClientRect();
-    const endRect = endBlock.getBoundingClientRect();
-  
-    const svgNamespace = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNamespace, "svg");
-    const path = document.createElementNS(svgNamespace, "path");
-  
-    const startX = startRect.left + startRect.width / 2 - containerRect.left;
-    const startY = startRect.top + startRect.height / 2 - containerRect.top;
-    const endX = endRect.left + endRect.width / 2 - containerRect.left;
-    const endY = endRect.top + endRect.height / 2 - containerRect.top;
-  
-    // Definindo os pontos de desvio para contornar os blocos
-    const offsetX = Math.sign(endX - startX) * 20; // Deslocamento horizontal
-    const offsetY = Math.sign(endY - startY) * 20; // Deslocamento vertical
-  
-    const pathData = `
-      M ${startX},${startY}
-      L ${startX + offsetX},${startY}
-      L ${startX + offsetX},${endY - offsetY}
-      L ${endX},${endY - offsetY}
-      L ${endX},${endY}
-    `;
-    path.setAttribute("d", pathData);
-    path.setAttribute("stroke", color); // Define a cor do arquivo
-    path.setAttribute("stroke-width", "2");
-    path.setAttribute("fill", "none");
-    path.setAttribute("marker-end", `url(#arrowhead-${color.replace("#", "")})`); // Usa marcador com a cor
-  
-    // Criar marcador para a ponta da seta
-    const marker = document.createElementNS(svgNamespace, "marker");
-    marker.setAttribute("id", `arrowhead-${color.replace("#", "")}`);
-    marker.setAttribute("markerWidth", "10");
-    marker.setAttribute("markerHeight", "7");
-    marker.setAttribute("refX", "10");
-    marker.setAttribute("refY", "3.5");
-    marker.setAttribute("orient", "auto");
-  
-    const arrow = document.createElementNS(svgNamespace, "path");
-    arrow.setAttribute("d", "M 0 0 L 10 3.5 L 0 7 Z");
-    arrow.setAttribute("fill", color); // Define a cor da ponta da seta
-    marker.appendChild(arrow);
-  
-    const defs = document.createElementNS(svgNamespace, "defs");
-    defs.appendChild(marker);
-    svg.appendChild(defs);
-    svg.appendChild(path);
-  
-    svg.style.position = "absolute";
-    svg.style.left = "0";
-    svg.style.top = "0";
-    svg.style.width = "100%";
-    svg.style.height = "100%";
-    svg.style.pointerEvents = "none";
-  
-    return svg;
-  }
-  
-  
-  
-  
-  
-  
+
   function renderTable() {
     allocationTable.innerHTML = "";
 
     for (const [fileName, data] of Object.entries(files)) {
-      let blockList = "";
+        let blockList = "";
 
-      if (allocationType === "linked") {
-        blockList = data.blocks
-          .map((b) => `${b} ${disk[b].next !== null ? "→" : ""}`)
-          .join(" ");
-      } else if (allocationType === "indexed") {
-        blockList = `Índice: ${data.blocks[0]} | Dados: ${data.blocks.slice(1).join(", ")}`;
-      } else {
-        blockList = data.blocks.join(", ");
-      }
+        if (allocationType === "linked") {
+            blockList = data.blocks
+                .map((b) => `${b} ${disk[b].next !== null ? "→" : ""}`)
+                .join(" ");
+        } else if (allocationType === "indexed") {
+            blockList = `Índice: ${data.blocks[0]} | Dados: ${data.blocks.slice(1).join(", ")}`;
+        } else {
+            blockList = data.blocks.join(", ");
+        }
 
-      const row = document.createElement("tr");
-      row.innerHTML = `<td>${fileName}</td><td>${blockList}</td>`;
-      allocationTable.appendChild(row);
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${fileName}</td><td>${blockList}</td>`;
+        allocationTable.appendChild(row);
     }
   }
 
@@ -202,20 +115,19 @@ document.addEventListener("DOMContentLoaded", () => {
   
     if (!allocatedBlocks) return alert("Não foi possível alocar o arquivo!");
   
-    const fileColor = generateRandomColor(); // Gerar uma cor para o arquivo
+    const fileColor = generateRandomColor();
   
     allocatedBlocks.forEach((block) => {
       if (allocationType !== "linked") {
-        disk[block] = fileName; // Para encadeado, já está configurado na função
+        disk[block] = fileName;
       }
     });
   
-    files[fileName] = { blocks: allocatedBlocks, color: fileColor }; // Salvar a cor no arquivo
+    files[fileName] = { blocks: allocatedBlocks, color: fileColor };
   
     renderDisk();
     renderTable();
   }
-  
 
   function removeFile(fileName) {
     if (!files[fileName]) return alert("Arquivo não encontrado!");
